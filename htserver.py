@@ -5,7 +5,7 @@ import logging
 
 class HTServer:
     @classmethod
-    def listen(cls, host=None, port=None, gateuri='/ht/gate', tsuri='/ht/ts'):
+    def listen(cls, host=None, port=None, gateuri='/ht/gate', datauri='/ht/data'):
         asyncio.Task(asyncio.start_server(cls, host=host, port=port))
 
     def __init__(self, reader, writer):
