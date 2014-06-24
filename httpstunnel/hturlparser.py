@@ -19,9 +19,9 @@ class HTURLParser:
         connect_port: The port number to be connected
         connect_request: The second parameter to be sent when HTTP connection is set up
         '''
-        self.url = url
+        self.url = str(url)
         try:
-            urlsplit = urllib.parse.urlsplit(url, scheme='http')
+            urlsplit = urllib.parse.urlsplit(str(url), scheme='http')
             self.scheme = urlsplit.scheme
             self.hostname = urlsplit.hostname
             if urlsplit.port is None:
