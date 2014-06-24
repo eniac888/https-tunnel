@@ -29,7 +29,7 @@ class HTURLParser:
             else:
                 self.port = urlsplit.port
             self.vhost = urlsplit.netloc
-            self.path = urlsplit.path or '/'
+            self.path = urlsplit.path.replace(' ', '%20') or '/'
             self.query = urlsplit.query
             self.request = self.path+('?'+self.query if self.query else '')
             self.proxy = False
@@ -38,16 +38,15 @@ class HTURLParser:
             if self.proxy:
                 self.connect_hostname = self.proxy_hostname
                 self.connect_port = self.proxy_port
-                if self.scheme == 'https':
-                    if ':' in self.hostname:
-                        self.connect_request = '[%s]:%d' % (self.hostname, self.port)
-                    else:
-                        self.connect_request = ':'.join((self.hostname, self.port))
+                self.connect_ssl = self.proxy_scheme == 'https'
+                if self.scheme == 'http':
+                    self.connect_request = urllib.parse.urlunsplit((self.scheme, self.vhost.replace(' ', '%20'), self.path, self.query, ''))
                 else:
-                    self.connect_request = urllib.parse.urlunsplit(urlsplit[:4]+('',))
+                    self.connect_request = self.request
             else:
                 self.connect_hostname = self.hostname
                 self.connect_port = self.port
+                self.connect_ssl = self.scheme == 'https'
                 self.connect_request = self.request
         except (AttributeError, IndexError, TypeError, ValueError) as e:
             raise ValueError('Invalid URL: %s' % url) from e
@@ -69,6 +68,11 @@ class HTURLParser:
                     self.proxy_port = 443 if self.proxy_scheme == 'https' else 80
                 else:
                     self.proxy_port = proxy_urlsplit.port
+                if self.proxy_scheme == 'https':
+                    if ':' in self.hostname:
+                        self.proxy_request = '[%s]:%d' % (self.hostname.replace(' ', '%20'), self.port)
+                    else:
+                        self.proxy_request = '%s:%d' % (self.hostname.replace(' ', '%20'), self.port)
                 self.proxy = True
             except Exception:
                 logging.error('Can not use proxy %s' % proxy)
