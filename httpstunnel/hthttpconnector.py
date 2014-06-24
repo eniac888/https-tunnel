@@ -76,7 +76,7 @@ class HTHTTPConnectionManager:
                 del cls.connections[addr_tuple]
             rwpair_1_close()
             try:
-                self.ssl_wrapped[1].close()
+                rwpair[1].ssl_wrapped[1].close()
             except AttributeError:
                 pass
         rwpair[1].close = on_connection_close
