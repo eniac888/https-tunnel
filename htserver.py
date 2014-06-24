@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import asyncio
+import hashlib
 import logging
+import salsa20
 
 class HTServer:
     @classmethod
