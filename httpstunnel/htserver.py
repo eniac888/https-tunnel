@@ -28,12 +28,13 @@ class HTServer:
             return
         line = line.rstrip(b'\r\n').decode('iso-8859-1')
         try:
-            method, self.uri = line.split(' ', 2)[:2]
+            method, self.uri = line.split(' ', 1)
+            self.uri = self.uri.rsplit(' ', 1)[0]
         except ValueError:
             yield from self.write_error(400)
             return
         if method.upper() != 'POST':
-            yield from self.write_error(404)
+            yield from self.write_error(405)
             return
         logging.info('Request URI: %s' % self.uri)
         self.request_headers = {}
@@ -54,6 +55,7 @@ class HTServer:
         http_error_table = {
             400: 'Bad Request',
             404: 'Not Found',
+            405: 'Method Not Allowed',
             500: 'Internal Server Error',
             503: 'Service Unavailable'
         }
