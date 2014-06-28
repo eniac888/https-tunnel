@@ -21,7 +21,8 @@ class HTClient:
 def main():
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(HTClient.connect(gateuri='http://localhost:8888/'))
+    asyncio.Task(HTClient.connect(gateuri='http://localhost:8888/'))
+    loop.run_forever()
 
 
 if __name__ == '__main__':

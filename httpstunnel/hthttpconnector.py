@@ -26,8 +26,9 @@ class HTHTTPConnector:
             headers['Connection'] = headers.get('Connection', 'keep-alive')
         self.writer.writelines([request_line.encode('utf-8', 'replace'), '\r\n'.join(map(': '.join, sorted(headers.items()))).encode('utf-8', 'replace'), b'\r\n\r\n'])
 
+    @asyncio.coroutine
     def close(self):
-        htconnectionpool.HTConnectionPool.push_connection(self.reader, self.writer, self.url.hostname, self.url.port, ssl=self.url.scheme == 'https')
+        yield from htconnectionpool.HTConnectionPool.push_connection(self.reader, self.writer, self.url.hostname, self.url.port, ssl=self.url.scheme == 'https')
 
     @asyncio.coroutine
     def _do_proxy_connect(self):

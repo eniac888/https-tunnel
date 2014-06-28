@@ -41,15 +41,20 @@ class HTConnectionPool:
     def flush_idle_connections(cls):
         if cls._flush_idle_connections_running:
             return
+        cls._do_flush_idle_connections()
+
+    @classmethod
+    def _do_flush_idle_connections(cls):
+        print('_do_flush_idle_connections(%r)' % cls.connections)
         if len(cls.connections) != 0:
             cls._flush_idle_connections_running = True
             loop = asyncio.get_event_loop()
             time_now = loop.time()
             time_min = time_now
-            for addr_tuple in cls.connections:
+            for addr_tuple in cls.connections.copy():
                 connections_set = cls.connections[addr_tuple]
                 for idx, this_connection in reversed(list(enumerate(connections_set))):  # list() generates a new copy
-                    if this_connection[0].at_eof() or this_connection[2] - time_now > htglobal.HTTP_IDLE_TIME:
+                    if this_connection[0].at_eof() or time_now - this_connection[2] > htglobal.HTTP_IDLE_TIME:
                         del connections_set[idx]  # delete in reversed order
                         try:
                             this_connection[1].close()
@@ -64,6 +69,6 @@ class HTConnectionPool:
                 if len(connections_set) == 0:
                     del cls.connections[addr_tuple]
             if len(cls.connections) != 0:
-                loop.call_later(htglobal.HTTP_IDLE_TIME+time_min-time_now, flush_idle_connections)
+                loop.call_later(htglobal.HTTP_IDLE_TIME+time_min-time_now, cls._do_flush_idle_connections)
             else:
                 cls._flush_idle_connections_running = False
