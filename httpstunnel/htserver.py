@@ -5,7 +5,9 @@ import hashlib
 import logging
 import salsa20
 
+
 class HTServer:
+
     @classmethod
     def listen(cls, host=None, port=None, gateuri='/ht/gate', datauri='/ht/data'):
         asyncio.Task(asyncio.start_server(cls, host=host, port=port))
@@ -64,11 +66,13 @@ class HTServer:
         self.reader.feed_eof()
         yield from self.reader.read()
 
+
 def main():
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
     loop = asyncio.get_event_loop()
     HTServer.listen(port=8888)
     loop.run_forever()
+
 
 if __name__ == '__main__':
     main()
