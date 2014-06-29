@@ -63,8 +63,11 @@ class HTServer:
     @asyncio.coroutine
     def dispatch_http_request(self):
         if self.uri == htglobal.GATEWAY_ADDR:
-            
-        if self.uri == htglobal.DATA_ADDR:
+            pass
+        elif self.uri == htglobal.DATA_ADDR:
+            pass
+        else:
+            self.write_error(404)
 
 
 def main():
@@ -75,12 +78,14 @@ def main():
     parser.add_argument('-d', '--data', help='Data transport address [Default: /ht/file.php]', default='/ht/file.php')
     parser.add_argument('-p', '--port', type=int, help='Port to listen on [Default: 8888]', default=8888)
     parser.add_argument('-l', '--listen', help='Address to listen on [Default: localhost]', default=None)
+    parser.add_argument('-u', '--authdb', help='Authenciation database [Default: passwd]', default='passwd.db')
     args = parser.parse_args()
     htglobal.ENCRYPT_KEY = args.key
     htglobal.GATEWAY_ADDR = args.gateway
     htglobal.DATA_ADDR = args.data
     htglobal.LISTEN_PORT = args.port
     htglobal.LISTEN_ADDR = args.listen
+    htglobal.AUTH_DB = args.authdb
     loop = asyncio.get_event_loop()
     HTServer.listen(host=htglobal.LISTEN_ADDR, port=htglobal.LISTEN_PORT)
     loop.run_forever()
