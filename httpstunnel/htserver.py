@@ -6,6 +6,7 @@ import hashlib
 import logging
 import urllib.request
 
+import htauth
 import htglobal
 import hthttperror
 import htstreamutil
@@ -57,17 +58,17 @@ class HTServer:
 
     @asyncio.coroutine
     def write_error(self, error_code):
-        self.writer.write(hthttperror.get_http_error(error_code)
+        self.writer.write(hthttperror.get_http_error(error_code))
         yield from htstreamutil.full_close(self.reader, self.writer)
 
     @asyncio.coroutine
     def dispatch_http_request(self):
         if self.uri == htglobal.GATEWAY_ADDR:
-            pass
+            yield from htauth.HTAuth.accept_auth(self)
         elif self.uri == htglobal.DATA_ADDR:
             pass
         else:
-            self.write_error(404)
+            yield from self.write_error(404)
 
 
 def main():
@@ -76,13 +77,17 @@ def main():
     parser.add_argument('-k', '--key', help='Encryption key')
     parser.add_argument('-g', '--gateway', help='Gateway address [Default: /ht/login.php]', default='/ht/login.php')
     parser.add_argument('-d', '--data', help='Data transport address [Default: /ht/file.php]', default='/ht/file.php')
+    parser.add_argument('-D', '--data-pass-to-client', help='Data transport address to pass to clients [Default: the same as data transport address]')
     parser.add_argument('-p', '--port', type=int, help='Port to listen on [Default: 8888]', default=8888)
     parser.add_argument('-l', '--listen', help='Address to listen on [Default: localhost]', default=None)
     parser.add_argument('-u', '--authdb', help='Authenciation database [Default: passwd]', default='passwd.db')
     args = parser.parse_args()
+    if args.data_pass_to_client is None:
+        args.data_pass_to_client = args.data
     htglobal.ENCRYPT_KEY = args.key
     htglobal.GATEWAY_ADDR = args.gateway
     htglobal.DATA_ADDR = args.data
+    htglobal.DATA_REDIR = args.data_pass_to_client
     htglobal.LISTEN_PORT = args.port
     htglobal.LISTEN_ADDR = args.listen
     htglobal.AUTH_DB = args.authdb

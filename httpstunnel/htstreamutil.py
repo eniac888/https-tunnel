@@ -33,4 +33,4 @@ def read_http_chunk(reader, headers={'Content-Encoding': 'chunked'}):
     elif 'Content-Length' in headers:
         return (yield from reader.read_exactly(int(headers['Content-Length'])))
     else:
-        return (yield from reader.read())
+        return b''
